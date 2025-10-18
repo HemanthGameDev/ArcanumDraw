@@ -16,6 +16,7 @@ public class GestureDrawingManager : MonoBehaviour
     private InputSystem_Actions inputActions;
     
     private bool isDrawing = false;
+    private bool hasStartedVisualLine = false;
     private List<GesturePoint> currentGesturePoints = new List<GesturePoint>();
     private Vector2 lastRecordedScreenPosition;
     
@@ -62,7 +63,7 @@ public class GestureDrawingManager : MonoBehaviour
     
     private void OnTouchBegan(InputAction.CallbackContext context)
     {
-        Vector2 screenPosition = GetCurrentScreenPosition();
+        Vector2 screenPosition = ReadScreenPositionFromInput();
         
         if (!runePadController.IsPositionInsideRunePad(screenPosition))
         {
@@ -121,18 +122,17 @@ public class GestureDrawingManager : MonoBehaviour
     private void InitiateDrawing(Vector2 screenPosition)
     {
         isDrawing = true;
+        hasStartedVisualLine = false;
         currentGesturePoints.Clear();
         
         Vector2 localPosition = runePadController.ScreenToLocalPosition(screenPosition);
-        
-        lineRenderer.StartNewGestureLine(localPosition);
         
         GesturePoint initialPoint = new GesturePoint(localPosition, Time.time);
         currentGesturePoints.Add(initialPoint);
         
         lastRecordedScreenPosition = screenPosition;
         
-        Debug.Log($"Drawing Initiated at Screen: {screenPosition}, Local: {localPosition}");
+        Debug.Log($"Drawing Initiated at Screen: {screenPosition}, Local: {localPosition} (visual pending movement)");
     }
     
     private void UpdateDrawing()
@@ -149,8 +149,23 @@ public class GestureDrawingManager : MonoBehaviour
         
         if (distance >= minDistanceBetweenPoints)
         {
+            if (!hasStartedVisualLine)
+            {
+                StartVisualLine();
+            }
+            
             AddPointToCurrentGesture(currentScreenPosition);
         }
+    }
+    
+    private void StartVisualLine()
+    {
+        hasStartedVisualLine = true;
+        
+        Vector2 initialLocalPosition = currentGesturePoints[0].position;
+        lineRenderer.StartNewGestureLine(initialLocalPosition);
+        
+        Debug.Log($"Visual line started at: {initialLocalPosition}");
     }
     
     private void AddPointToCurrentGesture(Vector2 screenPosition)
@@ -183,24 +198,42 @@ public class GestureDrawingManager : MonoBehaviour
     {
         isDrawing = false;
         
-        if (currentGesturePoints.Count >= 2)
+        if (currentGesturePoints.Count >= 2 && hasStartedVisualLine)
         {
             lineRenderer.FinalizeCurrentLine();
             ProcessCompletedGesture(currentGesturePoints);
         }
         else
         {
-            lineRenderer.DiscardCurrentLine();
-            Debug.Log("Gesture too short - discarded (single tap, no drag)");
+            if (hasStartedVisualLine)
+            {
+                lineRenderer.DiscardCurrentLine();
+            }
+            Debug.Log("Gesture too short - discarded (single tap or no drag)");
         }
         
         currentGesturePoints.Clear();
+        hasStartedVisualLine = false;
     }
     
     private void ProcessCompletedGesture(List<GesturePoint> gesturePoints)
     {
         Debug.Log($"Gesture Completed: {gesturePoints.Count} points recorded");
         Debug.Log("Ready for gesture recognition system (Phase 2.2)");
+    }
+    
+    private Vector2 ReadScreenPositionFromInput()
+    {
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
+        {
+            return Touchscreen.current.primaryTouch.position.ReadValue();
+        }
+        else if (Mouse.current != null)
+        {
+            return Mouse.current.position.ReadValue();
+        }
+        
+        return Vector2.zero;
     }
     
     private Vector2 GetCurrentScreenPosition()
