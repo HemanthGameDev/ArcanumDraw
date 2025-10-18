@@ -166,7 +166,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GestureLineRenderer
   lineContainer: {fileID: 1791521380}
   circleSprite: {fileID: 21300000, guid: 158ee3fc5926745418c971725bb43cfc, type: 3}
-  lineWidth: 10
+  lineWidth: 5
   lineColor: {r: 0, g: 1, b: 1, a: 1}
   clearFadeDuration: 0.5
   minPointsToDisplay: 2
