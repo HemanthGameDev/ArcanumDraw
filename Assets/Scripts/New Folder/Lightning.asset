@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5b386e1ac7045e4c8e605214ed25193, type: 3}
+  m_Name: Lightning
+  m_EditorClassIdentifier: Assembly-CSharp::SpellData
+  spellName: lightning
+  spellID: Lightning Strike
+  manaCost: 30
+  cooldownTime: 3
+  spellEffectPrefab: {fileID: 7902052375747325271, guid: 30eb77b8c37065244a25354523bbbde1, type: 3}
+  gestureTemplate:
+  - {x: -50, y: 0}
+  - {x: -46.875, y: 6.25}
+  - {x: -43.75, y: 12.5}
+  - {x: -40.625, y: 18.75}
+  - {x: -37.5, y: 25}
+  - {x: -34.375, y: 31.25}
+  - {x: -31.25, y: 37.5}
+  - {x: -28.125, y: 43.75}
+  - {x: -25, y: 50}
+  - {x: -21.875, y: 56.25}
+  - {x: -18.75, y: 62.5}
+  - {x: -15.625, y: 68.75}
+  - {x: -12.5, y: 75}
+  - {x: -9.375, y: 81.25}
+  - {x: -6.25, y: 87.5}
+  - {x: -3.125, y: 93.75}
+  - {x: 0, y: 100}
+  - {x: 3.125, y: 93.75}
+  - {x: 6.25, y: 87.5}
+  - {x: 9.375, y: 81.25}
+  - {x: 12.5, y: 75}
+  - {x: 15.625, y: 68.75}
+  - {x: 18.75, y: 62.5}
+  - {x: 21.875, y: 56.25}
+  - {x: 25, y: 50}
+  - {x: 28.125, y: 43.75}
+  - {x: 31.25, y: 37.5}
+  - {x: 34.375, y: 31.25}
+  - {x: 37.5, y: 25}
+  - {x: 40.625, y: 18.75}
+  - {x: 43.75, y: 12.5}
+  - {x: 46.875, y: 6.25}
+  - {x: 50, y: 0}
+  recognitionTolerance: 0.3
+  allowRotation: 0
+  enforceStrokeOrder: 0
+  enforceSpeed: 1
+  expectedSpeedRange: {x: 20, y: 50}
+  enforceDirection: 0
+  expectedDirection: 0
+  uiIcon: {fileID: 0}
+  gestureHintSprite: {fileID: 0}
+  highlightColor: {r: 0, g: 1, b: 1, a: 1}
+  highlightDuration: 0.5

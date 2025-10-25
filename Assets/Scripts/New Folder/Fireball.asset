@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5b386e1ac7045e4c8e605214ed25193, type: 3}
+  m_Name: Fireball
+  m_EditorClassIdentifier: Assembly-CSharp::SpellData
+  spellName: fireball
+  spellID: Fireball
+  manaCost: 20
+  cooldownTime: 2
+  spellEffectPrefab: {fileID: 6603777680238412958, guid: 8de7c962ca4cda7469f63250b709ea05, type: 3}
+  gestureTemplate:
+  - {x: 100, y: 0}
+  - {x: 98.07852, y: 19.509033}
+  - {x: 92.38795, y: 38.268345}
+  - {x: 83.14696, y: 55.557026}
+  - {x: 70.71068, y: 70.71068}
+  - {x: 55.55702, y: 83.146965}
+  - {x: 38.26834, y: 92.38795}
+  - {x: 19.509024, y: 98.07853}
+  - {x: -0.000004371139, y: 100}
+  - {x: -19.509033, y: 98.07852}
+  - {x: -38.268353, y: 92.38795}
+  - {x: -55.557037, y: 83.14696}
+  - {x: -70.71068, y: 70.71068}
+  - {x: -83.146965, y: 55.55702}
+  - {x: -92.38796, y: 38.268326}
+  - {x: -98.07853, y: 19.509031}
+  - {x: -100, y: -0.000008742278}
+  - {x: -98.07852, y: -19.509048}
+  - {x: -92.38795, y: -38.26834}
+  - {x: -83.14696, y: -55.55703}
+  - {x: -70.71066, y: -70.710686}
+  - {x: -55.557, y: -83.14698}
+  - {x: -38.268314, y: -92.38797}
+  - {x: -19.509039, y: -98.07852}
+  - {x: 0.0000011924881, y: -100}
+  - {x: 19.50904, y: -98.07852}
+  - {x: 38.26836, y: -92.38795}
+  - {x: 55.55704, y: -83.14695}
+  - {x: 70.7107, y: -70.710655}
+  - {x: 83.14696, y: -55.55703}
+  - {x: 92.387955, y: -38.26834}
+  - {x: 98.07853, y: -19.509024}
+  recognitionTolerance: 0.25
+  allowRotation: 1
+  enforceStrokeOrder: 0
+  enforceSpeed: 1
+  expectedSpeedRange: {x: 10, y: 30}
+  enforceDirection: 0
+  expectedDirection: 0
+  uiIcon: {fileID: 0}
+  gestureHintSprite: {fileID: 0}
+  highlightColor: {r: 0, g: 1, b: 1, a: 1}
+  highlightDuration: 0.5

@@ -7,6 +7,8 @@ public class GestureDrawingManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private RunePadController runePadController;
     [SerializeField] private GestureLineRenderer lineRenderer;
+    [SerializeField] private GestureRecognizer gestureRecognizer;
+    [SerializeField] private SpellCaster spellCaster;
     
     [Header("Touch Settings")]
     [SerializeField] private float minDistanceBetweenPoints = 1f;
@@ -19,6 +21,7 @@ public class GestureDrawingManager : MonoBehaviour
     private bool hasStartedVisualLine = false;
     private List<GesturePoint> currentGesturePoints = new List<GesturePoint>();
     private Vector2 lastRecordedScreenPosition;
+    private float gestureStartTime = 0f;
     
     private float lastTapTime = -1f;
     private Vector2 lastTapScreenPosition;
@@ -124,6 +127,7 @@ public class GestureDrawingManager : MonoBehaviour
         isDrawing = true;
         hasStartedVisualLine = false;
         currentGesturePoints.Clear();
+        gestureStartTime = Time.time;
         
         Vector2 localPosition = runePadController.ScreenToLocalPosition(screenPosition);
         
@@ -219,7 +223,45 @@ public class GestureDrawingManager : MonoBehaviour
     private void ProcessCompletedGesture(List<GesturePoint> gesturePoints)
     {
         Debug.Log($"Gesture Completed: {gesturePoints.Count} points recorded");
-        Debug.Log("Ready for gesture recognition system (Phase 2.2)");
+        
+        if (gestureRecognizer == null)
+        {
+            Debug.LogWarning("GestureRecognizer is not assigned. Cannot recognize gesture.");
+            return;
+        }
+        
+        List<Vector3> points3D = new List<Vector3>();
+        foreach (GesturePoint gp in gesturePoints)
+        {
+            points3D.Add(new Vector3(gp.position.x, gp.position.y, 0f));
+        }
+        
+        float totalDrawingTime = Time.time - gestureStartTime;
+        
+        GestureRecognitionResult result = gestureRecognizer.RecognizeGesture(points3D, totalDrawingTime);
+        
+        if (result.success)
+        {
+            Debug.Log($"<color=green>{result.message}</color>");
+            Debug.Log($"Speed: {result.drawSpeed:F2} | Direction: {result.drawDirection}");
+            
+            if (spellCaster != null)
+            {
+                spellCaster.AttemptCastSpell(result.recognizedSpell);
+            }
+            else
+            {
+                Debug.LogWarning("SpellCaster reference is missing. Cannot cast spell.");
+            }
+        }
+        else
+        {
+            Debug.Log($"<color=yellow>{result.message}</color>");
+            if (result.confidence > 0)
+            {
+                Debug.Log($"Best match confidence: {result.confidence:P0} (threshold not met)");
+            }
+        }
     }
     
     private Vector2 ReadScreenPositionFromInput()
@@ -253,5 +295,13 @@ public class GestureDrawingManager : MonoBehaviour
     public List<GesturePoint> GetCurrentGesturePoints()
     {
         return new List<GesturePoint>(currentGesturePoints);
+    }
+    
+    public void ClearAllDrawings()
+    {
+        if (lineRenderer != null)
+        {
+            lineRenderer.ClearAllLinesWithFade();
+        }
     }
 }
