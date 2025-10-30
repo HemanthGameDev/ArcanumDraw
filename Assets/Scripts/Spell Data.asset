@@ -12,20 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5b386e1ac7045e4c8e605214ed25193, type: 3}
   m_Name: Spell Data
   m_EditorClassIdentifier: Assembly-CSharp::SpellData
-  spellID: shield_fast_circle
   spellName: Defensive Shield
-  description: 
-  gestureTemplate: []
+  spellID: shield_fast_circle
   manaCost: 15
   cooldownTime: 2
-  effectPrefab: {fileID: 0}
-  minScore: 0.7
+  spellEffectPrefab: {fileID: 0}
+  gestureTemplate: []
+  recognitionTolerance: 0.85
   allowRotation: 1
   enforceStrokeOrder: 0
-  enforceSpeed: 1
-  minSpeed: 200
-  maxSpeed: 1000
-  enforceDirection: 1
+  enforceSpeed: 0
+  expectedSpeedRange: {x: 5, y: 15}
+  enforceDirection: 0
   expectedDirection: 1
+  uiIcon: {fileID: 0}
+  gesturePatternIcon: {fileID: 0}
   highlightColor: {r: 0, g: 1, b: 1, a: 1}
   highlightDuration: 0.3

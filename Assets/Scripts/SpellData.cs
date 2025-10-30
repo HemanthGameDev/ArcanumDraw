@@ -38,8 +38,12 @@ public class SpellData : ScriptableObject
     public GestureDirection expectedDirection = GestureDirection.None;
     
     [Header("Visual Feedback")]
+    [Tooltip("Icon displayed in the spell slot UI")]
     public Sprite uiIcon;
-    public Sprite gestureHintSprite;
+    
+    [Tooltip("Pattern/gesture hint shown to player for drawing this spell")]
+    public Sprite gesturePatternIcon;
+    
     public Color highlightColor = Color.cyan;
     public float highlightDuration = 0.5f;
 }

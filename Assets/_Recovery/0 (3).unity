@@ -237,7 +237,6 @@ GameObject:
   - component: {fileID: 224219381}
   - component: {fileID: 224219380}
   - component: {fileID: 224219382}
-  - component: {fileID: 224219383}
   m_Layer: 0
   m_Name: GestureManager
   m_TagString: Untagged
@@ -293,9 +292,7 @@ MonoBehaviour:
   runePadController: {fileID: 1195897528}
   lineRenderer: {fileID: 224219380}
   gestureRecognizer: {fileID: 224219382}
-  gestureRecognizerNew: {fileID: 224219383}
   spellCaster: {fileID: 1833194213}
-  useNewRecognizer: 1
   minDistanceBetweenPoints: 1
   doubleTapTimeWindow: 0.3
   doubleTapMaxDistance: 50
@@ -320,39 +317,12 @@ MonoBehaviour:
   resamplePointCount: 64
   normalizedSquareSize: 250
   useAdvancedRecognition: 1
-  pathDistanceWeight: 0.35
-  shapeFeaturesWeight: 0.35
+  showDetailedDiagnostics: 1
+  pathDistanceWeight: 0.4
+  shapeFeaturesWeight: 0.3
   directionalWeight: 0.3
-  matchingThreshold: 0.6
-  minimumConfidenceGap: 0.08
---- !u!114 &224219383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 224219376}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f0b334b461e3c64d9591118526f3c32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GestureRecognizerNew
-  availableSpells:
-  - {fileID: 11400000, guid: 20db4e9cfd9120e44aed7bf8497854be, type: 2}
-  - {fileID: 11400000, guid: 2c66823b2275c8841bf0de9d238ef714, type: 2}
-  - {fileID: 11400000, guid: 077ea71af5003584b89f1af04c4f57c0, type: 2}
-  spellCaster: {fileID: 1833194213}
-  playerUIController: {fileID: 1647204166}
-  resamplePointCount: 64
-  normalizedSquareSize: 250
-  useMultiRotationMatching: 1
-  useGoldenSectionSearch: 1
-  rotationSteps: 8
-  recognitionTolerance: 0.85
-  useScaleInvariance: 1
-  useStartPointInvariance: 1
-  startPointTests: 8
-  debugMode: 1
+  matchingThreshold: 0.35
+  minimumConfidenceGap: 0.1
 --- !u!1 &267321183
 GameObject:
   m_ObjectHideFlags: 0
@@ -2224,6 +2194,7 @@ MonoBehaviour:
   - {fileID: 2127513688}
   - {fileID: 805512656}
   - {fileID: 1284552482}
+  - {fileID: 0}
   gestureHighlightImage: {fileID: 267321186}
   highlightDuration: 0.3
   highlightScaleCurve:

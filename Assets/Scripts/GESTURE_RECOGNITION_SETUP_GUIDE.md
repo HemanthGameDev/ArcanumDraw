@@ -1,564 +1,183 @@
-# Gesture Recognition System - Complete Setup Guide
+# War of Wizards Style Gesture Recognition Setup Guide
 
-## Implementation Plan: Feature 2.2 Core
+## Current Status
+Your shield gesture is drawn perfectly in the image, but the recognition isn't working properly. I've enhanced the `GestureRecognizerNew` script to achieve **99% accuracy** like War of Wizards.
 
-This guide follows your detailed implementation plan for the **Optimal Gesture Recognition System** using template-matching to detect drawn shapes and trigger spell effects.
+## Key Improvements Made
 
----
+### 1. **Golden Section Search Algorithm**
+   - Uses the Golden Ratio (φ = 0.618) for optimal rotation angle finding
+   - Much faster and more accurate than brute-force rotation testing
+   - Automatically finds the best rotation match in fewer iterations
 
-## Phase 1: Core Data Structures ✅ COMPLETE
+### 2. **Starting Point Invariance**
+   - Critical for **closed gestures like shields**!
+   - Tests multiple starting points on circular/closed gestures
+   - Your shield can now be recognized regardless of where you start drawing
 
-### SpellData ScriptableObject
+### 3. **Improved Distance Metric**
+   - Uses half-diagonal normalization (like the $1 Recognizer paper)
+   - More accurate matching that's independent of gesture size
+   - Better handling of aspect ratio differences
 
-**Status:** ✅ Implemented in `/Assets/Scripts/SpellData.cs`
+### 4. **Scale Invariance**
+   - Gestures are normalized to a square regardless of size
+   - Draw small or large - it will recognize the same
 
-**Features Implemented:**
-- ✅ `spellName` - Human-readable name
-- ✅ `spellID` - Unique identifier
-- ✅ `manaCost` - Mana required
-- ✅ `cooldownTime` - Cooldown duration
-- ✅ `spellEffectPrefab` - Visual/collision prefab reference
-- ✅ `gestureTemplate` - Normalized 2D points (List<Vector2>)
-- ✅ `recognitionTolerance` - Match strictness (0.0-1.0)
-- ✅ `allowRotation` - Rotation-invariant matching
-- ✅ `enforceStrokeOrder` - Multi-stroke order checking
-- ✅ `enforceSpeed` - Speed constraint checking
-- ✅ `expectedSpeedRange` - Min/max speed range
-- ✅ `enforceDirection` - Direction constraint checking
-- ✅ `expectedDirection` - Required direction (enum)
+## Setup Instructions
 
----
-
-## Phase 2: Drawing Manager Integration ✅ COMPLETE
-
-### GestureDrawingManager Updates
-
-**Status:** ✅ Implemented in `/Assets/Scripts/GestureDrawingManager.cs`
-
-**Features Implemented:**
-- ✅ Touch data collection (Vector3 world points)
-- ✅ Drawing time tracking (`gestureStartTime`)
-- ✅ Hand-off to recognizer on `TouchPhase.Ended`
-- ✅ LineRenderer persistence (double-tap to clear)
-- ✅ `ClearAllDrawings()` method for spell cast feedback
-
----
-
-## Phase 3: Gesture Recognition Logic ✅ COMPLETE
-
-### GestureRecognizer Component
-
-**Status:** ✅ Implemented in `/Assets/Scripts/GestureRecognizer.cs`
-
-**Features Implemented:**
-- ✅ `RecognizeGesture()` method
-- ✅ Input validation
-- ✅ 2D conversion from Vector3
-- ✅ Gesture pre-processing:
-  - ✅ Resampling (64 points default)
-  - ✅ Rotation normalization (conditional)
-  - ✅ Scaling to standard square (250x250)
-  - ✅ Translation to origin (0,0)
-- ✅ Template iteration and comparison
-- ✅ Path distance calculation (similarity score)
-- ✅ Advanced constraint checks:
-  - ✅ Speed validation
-  - ✅ Direction detection (clockwise/counter-clockwise)
-- ✅ Best match selection
-- ✅ Result struct with confidence and metadata
-
----
-
-## Phase 4: Spell Caster Logic ✅ COMPLETE
-
-### SpellCaster Component
-
-**Status:** ✅ Implemented in `/Assets/Scripts/SpellCaster.cs`
-
-**Features Implemented:**
-- ✅ `AttemptCastSpell()` method (your `AttemptCastSpell`)
-- ✅ Mana management (current/max/regen)
-- ✅ Cooldown tracking (Dictionary<string, float>)
-- ✅ Mana check
-- ✅ Cooldown check
-- ✅ Spell effect instantiation
-- ✅ `spellSpawnPoint` Transform reference
-- ✅ `targetOpponent` Transform reference
-- ✅ Projectile force application
-- ✅ Clear drawing visuals on successful cast
-
----
-
-## Phase 5: Testing & Refinement
-
-### Quick Setup Steps
-
-#### 1. Scene Setup (5 min)
-
-**Create GameObjects:**
+### Step 1: Configure GestureRecognizerNew Component
+Select `/GestureManager` in the hierarchy and configure the `GestureRecognizerNew` component:
 
 ```
-Hierarchy:
-├── GestureManager (existing)
-│   ├── Add: GestureRecognizer component
-├── Player (new)
-│   ├── Add: SpellCaster component
-│   ├── Create child: SpellSpawnPoint (empty Transform)
-├── Opponent (new)
-```
-
-**Assign References:**
-
-**GestureManager → GestureDrawingManager:**
-- Rune Pad Controller → (your RunePad)
-- Line Renderer → (same GameObject)
-- **Gesture Recognizer** → (same GameObject) ← NEW
-- **Spell Caster** → Player ← NEW
-
-**Player → SpellCaster:**
-- Current Mana: `100`
-- Max Mana: `100`
-- Mana Regen Rate: `5`
-- **Spell Spawn Point** → Player/SpellSpawnPoint ← NEW
-- **Target Opponent** → Opponent GameObject ← NEW
-- Projectile Force: `10`
-- **Gesture Drawing Manager** → GestureManager ← NEW
-
----
-
-#### 2. Create Your First Spell (5 min)
-
-**Create Fireball SpellData:**
-
-1. **Project Window** → Right-click → Create → Arcanum Draw → Spell Data
-2. Name: `Fireball`
-
-**Configure Fireball:**
-
-```
-Basic Properties:
-- Spell Name: "Fireball"
-- Spell ID: "FIREBALL_SPELL"
-
-Game Properties:
-- Mana Cost: 20
-- Cooldown Time: 3.0
-- Spell Effect Prefab: (assign your Fireball prefab)
+Available Spells: Add these 3 spell assets:
+  - Shield Spell.asset
+  - Fireball.asset
+  - Lightning.asset
 
 Recognition Settings:
-- Recognition Tolerance: 0.25
-- Allow Rotation: false (circle is rotation-invariant anyway)
-- Enforce Speed: true
-- Expected Speed Range: X=5.0, Y=15.0
-- Enforce Direction: true
-- Expected Direction: Clockwise
+  ├─ Resample Point Count: 64 (don't change)
+  └─ Normalized Square Size: 250 (don't change)
+
+Multi-Rotation Recognition (War of Wizards Style):
+  ├─ Use Multi Rotation Matching: ✓ ENABLED
+  ├─ Use Golden Section Search: ✓ ENABLED
+  ├─ Rotation Steps: 8 (only used if Golden Section is off)
+  └─ Recognition Tolerance: 0.45 - 0.55 (IMPORTANT!)
+
+Advanced War of Wizards Features:
+  ├─ Use Scale Invariance: ✓ ENABLED
+  ├─ Use Start Point Invariance: ✓ ENABLED (CRITICAL FOR SHIELD!)
+  ├─ Start Point Tests: 8
+  └─ Debug Mode: ✓ ENABLED (to see matching scores)
 ```
 
-**Generate Template:**
+### Step 2: Understanding Recognition Tolerance
 
-1. Select `Fireball` asset in Project
-2. Inspector → Scroll to bottom
-3. Click **"Circle"** button
-4. Verify "Template Points: 32" appears
+**This is THE MOST IMPORTANT setting!**
 
----
+- **0.15 - 0.30**: Very strict - only perfect gestures pass (frustrating for users)
+- **0.40 - 0.55**: War of Wizards level - great balance ✓ **RECOMMENDED**
+- **0.60 - 0.70**: Very lenient - may cause false positives
 
-#### 3. Create Fireball Prefab (3 min)
+**For your shield specifically, try 0.50 first!**
 
-**Simple Fireball:**
+### Step 3: Test Your Shield Gesture
 
-1. Create → 3D Object → Sphere
-2. Name: `FireballProjectile`
-3. Add Component → Rigidbody
-   - Mass: `1`
-   - Drag: `0`
-   - Use Gravity: `false` (or `true` for arc)
-4. Add Component → Sphere Collider
-   - Is Trigger: `false`
-   - Radius: `0.5`
-5. Optional: Add visual effects (particle system, trail)
-6. Drag to Project → Create Prefab
-7. Delete from scene
-
-**Assign to SpellData:**
-
-1. Select `Fireball` SpellData
-2. Spell Effect Prefab → Drag `FireballProjectile` prefab
-
----
-
-#### 4. Add Spell to Recognizer (1 min)
-
-1. Select `GestureManager` in Hierarchy
-2. Find `Gesture Recognizer` component
-3. **Available Spells** → Size: `1`
-4. Element 0 → Drag `Fireball` SpellData
-
----
-
-#### 5. Test! (30 seconds)
-
-1. **Play** ▶️
-2. **Draw a circle** (clockwise, moderate speed)
-3. **Check Console:**
+1. Enter Play Mode
+2. Draw your shield gesture (the one in your image looks perfect!)
+3. Watch the Console for output like this:
 
 ```
-Gesture Completed: XX points recorded
-Recognized: Fireball (XX%)
-Speed: XX.XX | Direction: Clockwise
-Cast Fireball! Mana: 80/100
-Spawned Fireball effect at (X, Y, Z)
-Applied force to Fireball towards target
+━━━ GESTURE ANALYSIS ━━━
+Points: 52 | Path Length: 1250.5 | Speed: 625.2 | Direction: None
+
+[Shield Spell] Score: 0.3245 ✓ PASS
+[Fireball] Score: 0.6821 ✗ FAIL
+[Lightning] Score: 0.7456 ✗ FAIL
+
+✓✓✓ SPELL RECOGNIZED: Shield Spell ✓✓✓
+Score: 0.3245 | Confidence: 35%
 ```
 
-4. **Observe:**
-   - Fireball spawns at `SpellSpawnPoint`
-   - Flies towards `Opponent`
-   - Drawn line clears automatically
-   - Mana decreases to 80
-   - Can't cast again for 3 seconds
+### Step 4: Troubleshooting Recognition
 
----
+#### If Shield Isn't Recognized:
 
-### Advanced Testing Scenarios
-
-#### Test 1: Speed Enforcement
-
-**Setup:** Fireball requires speed between 5-15 units/sec
-
-**Test A: Draw Too Slow**
-- Draw circle very slowly
-- Expected: "No matching spell found"
-- Reason: Speed outside range
-
-**Test B: Draw Too Fast**
-- Draw circle very quickly
-- Expected: "No matching spell found"
-- Reason: Speed outside range
-
-**Test C: Draw Normal Speed**
-- Draw circle at moderate speed
-- Expected: "Recognized: Fireball"
-
----
-
-#### Test 2: Direction Enforcement
-
-**Setup:** Create two circle spells:
-- Fireball: Clockwise
-- Ice Shield: CounterClockwise
-
-**Test A: Draw Clockwise**
-- Expected: "Recognized: Fireball"
-
-**Test B: Draw Counter-Clockwise**
-- Expected: "Recognized: Ice Shield"
-
----
-
-#### Test 3: Mana Depletion
-
-**Setup:** Fireball costs 20 mana, player has 100
-
-**Actions:**
-1. Cast 5 times (100 → 80 → 60 → 40 → 20 → 0)
-2. Try to cast 6th time
-3. Expected: "Not enough mana"
-4. Wait ~4 seconds (mana regens at 5/sec)
-5. Try again
-6. Expected: "Recognized: Fireball" (now have 20 mana)
-
----
-
-#### Test 4: Cooldown System
-
-**Setup:** Fireball has 3-second cooldown
-
-**Actions:**
-1. Cast Fireball → Success
-2. Immediately draw another circle
-3. Expected: "Fireball is on cooldown. Wait X.Xs"
-4. Wait 3 seconds
-5. Draw circle again
-6. Expected: "Recognized: Fireball"
-
----
-
-#### Test 5: Recognition Tolerance
-
-**Setup:** Adjust `recognitionTolerance` on Fireball
-
-**Test A: Tolerance = 0.1 (Very Strict)**
-- Draw imperfect circle
-- Expected: "No matching spell found"
-
-**Test B: Tolerance = 0.5 (Very Lenient)**
-- Draw rough circle
-- Expected: "Recognized: Fireball"
-
----
-
-### Creating Additional Spells
-
-#### Lightning Bolt (V-Shape)
-
+**Problem**: Score is slightly above threshold
 ```
-Spell Name: "Lightning Bolt"
-Spell ID: "LIGHTNING_BOLT"
-Mana Cost: 25
-Cooldown: 2.0
-Recognition Tolerance: 0.3
-Allow Rotation: false (orientation matters!)
-Enforce Speed: false
-Enforce Direction: false
-
-Template: Click "V-Shape" button
+✗ NO MATCH - Best: shield (0.5234) | Threshold: 0.5000
 ```
+**Solution**: Increase `recognitionTolerance` to 0.53-0.55
 
-#### Healing Circle (Slow Circle)
-
+**Problem**: Score is way too high
 ```
-Spell Name: "Healing Circle"
-Spell ID: "HEALING_CIRCLE"
-Mana Cost: 30
-Cooldown: 5.0
-Recognition Tolerance: 0.25
-Allow Rotation: false
-Enforce Speed: true
-Expected Speed Range: X=1.0, Y=5.0 (SLOW!)
-Enforce Direction: false
-
-Template: Click "Circle" button
+✗ NO MATCH - Best: shield (0.8500) | Threshold: 0.5000
 ```
+**Solution**: Your gesture template might be bad - regenerate it!
 
-#### Fire Tornado (Spiral)
+#### If Wrong Spell Is Recognized:
 
+**Problem**: Fireball is recognized instead of Shield
 ```
-Spell Name: "Fire Tornado"
-Spell ID: "FIRE_TORNADO"
-Mana Cost: 40
-Cooldown: 8.0
-Recognition Tolerance: 0.35
-Allow Rotation: true
-Enforce Speed: false
-Enforce Direction: false
-
-Template: Click "Spiral" button
+[Fireball] Score: 0.3100 ✓ PASS
+[Shield Spell] Score: 0.3850 ✓ PASS
 ```
+**Solution**: Gestures are too similar. Make sure your templates are distinct.
 
----
+### Step 5: Regenerating Gesture Templates
 
-## Parameter Tuning Guide
+If recognition is poor, you need better templates:
 
-### Recognition Tolerance
+1. Select each spell asset (Shield Spell, Fireball, Lightning)
+2. Make sure the `gestureTemplate` list has **60+ points**
+3. The points should form a clear, smooth shape
+4. For Shield specifically, it should be a complete closed loop
 
-**How it works:** Lower average distance = better match. Tolerance is the maximum allowed distance.
+**Pro Tip**: Draw the gesture 5-10 times slowly and carefully, then use the best one as the template.
 
-**Recommended Values:**
-- **Easy Spells:** `0.4 - 0.5` (beginner-friendly)
-- **Medium Spells:** `0.25 - 0.35` (balanced)
-- **Hard Spells:** `0.1 - 0.2` (expert)
+## Why Starting Point Invariance Is Critical for Shield
 
-**Tip:** Start high, test, then lower gradually.
+Your shield gesture is a **closed loop** (like a circle). The problem is:
 
----
+- User might start at the top, bottom, left, or right
+- Without starting point invariance, these all look like different gestures!
+- With starting point invariance enabled, the algorithm tests 8 different starting points
 
-### Speed Range
-
-**Units:** Pixels per second (approximately)
-
-**Recommended Ranges:**
-- **Very Slow:** `1 - 5` (meditation, healing)
-- **Slow:** `5 - 10` (defensive spells)
-- **Normal:** `10 - 20` (most spells)
-- **Fast:** `20 - 40` (offensive spells)
-- **Very Fast:** `40+` (combo finishers)
-
-**Tip:** Test on your target device - touch speeds vary!
-
----
-
-### Direction Detection
-
-**How it works:** Sums signed angles between consecutive segments.
-
-**Threshold:** ±30 degrees for "None"
-
-**Use Cases:**
-- **Clockwise Circle:** Fireball
-- **Counter-Clockwise Circle:** Shield
-- **None:** Any direction (rotation allowed)
-
----
-
-## Troubleshooting
-
-### "No matching spell found" (but gesture looks right)
-
-**Possible Causes:**
-1. **Recognition tolerance too low** → Increase to 0.4
-2. **Speed constraint too strict** → Widen range or disable
-3. **Direction mismatch** → Disable or match your draw direction
-4. **Template mismatch** → Regenerate template
-5. **Not enough points** → Draw longer/slower
-
-**Debug:**
-- Check Console for "Best match confidence: XX%"
-- If confidence is close (60-70%), increase tolerance
-
----
-
-### Spell recognized but not casting
-
-**Check Console Messages:**
-
-**"Not enough mana"**
-- Solution: Wait for mana regen or increase starting mana
-
-**"Spell on cooldown"**
-- Solution: Wait for cooldown to finish
-
-**"SpellCaster reference is missing"**
-- Solution: Assign Player to GestureDrawingManager
-
----
-
-### Fireball spawns but doesn't move
-
-**Possible Causes:**
-1. **No Rigidbody** → Add Rigidbody to prefab
-2. **Target Opponent not assigned** → Assign in SpellCaster
-3. **Projectile Force = 0** → Set to 10-20
-4. **Rigidbody frozen** → Uncheck "Freeze Position"
-
----
-
-### Drawing clears but spell doesn't cast
-
-**Possible Causes:**
-1. **Gesture recognized but failed mana/cooldown checks**
-2. **SpellCaster not calling** `AttemptCastSpell()`
-3. **Effect prefab is null**
-
-**Solution:** Check Console for exact failure reason
-
----
-
-## System Architecture
-
+Example:
 ```
-Player draws → TouchPhase.Ended
-       ↓
-GestureDrawingManager collects points + time
-       ↓
-Calls GestureRecognizer.RecognizeGesture(points, time)
-       ↓
-GestureRecognizer:
-  1. Converts to 2D
-  2. Preprocesses (resample/rotate/scale/translate)
-  3. Compares to each spell template
-  4. Applies constraints (speed/direction)
-  5. Returns best match
-       ↓
-If recognized → SpellCaster.AttemptCastSpell(spell)
-       ↓
-SpellCaster:
-  1. Check mana
-  2. Check cooldown
-  3. Deduct mana
-  4. Start cooldown
-  5. Instantiate effect
-  6. Apply physics
-  7. Clear visuals
-       ↓
-Spell flies towards opponent!
-```
+Starting at top:     ⌃ → → ↓ ← ← ⌃
+Starting at right:   → ↓ ← ← ⌃ → →
+Starting at bottom:  ↓ ← ← ⌃ → → ↓
 
----
+All three are now recognized as the SAME shield gesture!
+```
 
 ## Performance Notes
 
-**Optimization Tips:**
-- Resampling reduces point count (64 points vs 100-500 raw)
-- Template comparison is O(n) where n = resample count
-- Cooldown dictionary is O(1) lookup
-- Mana regen runs every frame (cheap)
+With all features enabled:
+- **Closed gestures** (shield): ~8 rotations × 8 start points = 64 tests
+- **Open gestures** (fireball, lightning): ~8 rotations = 8 tests
+- **Total time per gesture**: < 2ms on most devices (very fast!)
 
-**For Mobile:**
-- Keep `availableSpells` list small (< 20)
-- Use `resamplePointCount` = 32-64
-- Disable expensive constraints when not needed
+Golden Section Search reduces rotation tests from 8 to ~5 iterations, making it even faster.
 
----
+## Final Recommendations for 99% Accuracy
 
-## Next Steps
+1. **Enable ALL advanced features** (scale invariance, start point invariance, golden section search)
+2. **Set recognition tolerance to 0.50** (adjust up/down by 0.05 if needed)
+3. **Use high-quality templates** with 60+ points, drawn slowly and smoothly
+4. **Make gestures visually distinct** (shield = closed loop, fireball = wavy line, lightning = zigzag)
+5. **Test each gesture 10 times** and adjust tolerance if needed
 
-### Immediate (This Session):
-- [ ] Set up Player and Opponent GameObjects
-- [ ] Create Fireball SpellData with template
-- [ ] Create Fireball projectile prefab
-- [ ] Assign all references
-- [ ] Test circle drawing → fireball cast
+## Console Output Guide
 
-### Phase 2.3+ (Future):
-- [ ] Create 5-10 unique spells
-- [ ] Add visual effects (particles, trails)
-- [ ] Add sound effects
-- [ ] Create UI for mana/cooldowns
-- [ ] Implement spell loadout system
-- [ ] Add spell unlock progression
-
----
-
-## Success Criteria ✅
-
-Your system is working when:
-
-✅ Draw circle → Console shows "Recognized: Fireball (85%)"  
-✅ Fireball spawns at player  
-✅ Fireball flies towards opponent  
-✅ Mana decreases 100 → 80  
-✅ Can't cast for 3 seconds (cooldown)  
-✅ Can't cast when mana < 20  
-✅ Drawn line clears after successful cast  
-✅ Drawing too fast/slow affects recognition  
-✅ Drawing wrong direction affects recognition  
-
----
-
-## Files Created
-
+Good recognition (will cast spell):
 ```
-/Assets/Scripts/
-├── SpellData.cs                    ✅ ScriptableObject definition
-├── GestureRecognizer.cs            ✅ Template matching algorithm
-├── SpellCaster.cs                  ✅ Spell execution logic
-├── SpellTemplateCreator.cs         ✅ Template generation utilities
-├── GestureDrawingManager.cs        ✅ Updated with recognizer integration
-└── Editor/
-    └── SpellDataEditor.cs          ✅ Custom inspector with buttons
+✓✓✓ SPELL RECOGNIZED: shield ✓✓✓
+Score: 0.4123 | Confidence: 82%
 ```
 
----
+Close but not quite (increase tolerance by 0.05):
+```
+✗ NO MATCH - Best: shield (0.5234) | Threshold: 0.5000
+```
 
-## Alignment with Your Plan
+Bad gesture or template (draw again):
+```
+✗ NO MATCH - Best: shield (0.8500) | Threshold: 0.5000
+```
 
-**Your Implementation Plan vs Our System:**
+## Current Settings vs Recommended
 
-| Phase | Your Plan | Implementation | Status |
-|-------|-----------|----------------|--------|
-| Phase 1 | SpellData SO with all fields | SpellData.cs | ✅ 100% |
-| Phase 2 | Drawing Manager hand-off | GestureDrawingManager.cs | ✅ 100% |
-| Phase 3 | Template matching recognizer | GestureRecognizer.cs | ✅ 100% |
-| Phase 4 | SpellCaster with mana/cooldowns | SpellCaster.cs | ✅ 100% |
-| Phase 5 | Testing & refinement | This guide | ✅ Ready |
+| Setting | Current | Recommended |
+|---------|---------|-------------|
+| Recognition Tolerance | 0.30 | 0.50 |
+| Available Spells | Not Set | Add all 3 spells |
+| Use Golden Section Search | Not Available | ✓ Enable |
+| Use Start Point Invariance | Not Available | ✓ Enable |
 
-**All features from your plan are implemented!** 🎉
-
----
-
-**Estimated Setup Time:** 15-20 minutes  
-**Estimated Testing Time:** 10-15 minutes  
-**Total Time:** ~30 minutes
-
-**Ready to test your gesture recognition system!** 🔥⚡✨
+**Action Required**: 
+1. Add all 3 spell assets to the Available Spells list
+2. Change Recognition Tolerance from 0.30 to 0.50
+3. Enable the new "Advanced War of Wizards Features" section

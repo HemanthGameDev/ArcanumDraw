@@ -11,7 +11,7 @@ public class SpellProjectile : MonoBehaviour
     [Header("Visual Effects")]
     [SerializeField] private GameObject impactEffectPrefab;
     [SerializeField] private TrailRenderer trailRenderer;
-    [SerializeField] private ParticleSystem particleSystem;
+    [SerializeField] private new ParticleSystem particleSystem;
     
     [Header("Audio")]
     [SerializeField] private AudioClip launchSound;

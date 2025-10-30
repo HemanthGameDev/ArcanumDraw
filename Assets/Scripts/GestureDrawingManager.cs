@@ -8,7 +8,12 @@ public class GestureDrawingManager : MonoBehaviour
     [SerializeField] private RunePadController runePadController;
     [SerializeField] private GestureLineRenderer lineRenderer;
     [SerializeField] private GestureRecognizer gestureRecognizer;
+    [SerializeField] private GestureRecognizerNew gestureRecognizerNew;
     [SerializeField] private SpellCaster spellCaster;
+    
+    [Header("Recognizer Settings")]
+    [Tooltip("Use new GestureRecognizerNew (recommended) or legacy GestureRecognizer")]
+    [SerializeField] private bool useNewRecognizer = true;
     
     [Header("Touch Settings")]
     [SerializeField] private float minDistanceBetweenPoints = 1f;
@@ -224,9 +229,15 @@ public class GestureDrawingManager : MonoBehaviour
     {
         Debug.Log($"Gesture Completed: {gesturePoints.Count} points recorded");
         
-        if (gestureRecognizer == null)
+        if (useNewRecognizer && gestureRecognizerNew == null)
         {
-            Debug.LogWarning("GestureRecognizer is not assigned. Cannot recognize gesture.");
+            Debug.LogWarning("GestureRecognizerNew is enabled but not assigned!");
+            return;
+        }
+        
+        if (!useNewRecognizer && gestureRecognizer == null)
+        {
+            Debug.LogWarning("GestureRecognizer is not assigned!");
             return;
         }
         
@@ -238,7 +249,9 @@ public class GestureDrawingManager : MonoBehaviour
         
         float totalDrawingTime = Time.time - gestureStartTime;
         
-        GestureRecognitionResult result = gestureRecognizer.RecognizeGesture(points3D, totalDrawingTime);
+        GestureRecognitionResult result = useNewRecognizer
+            ? gestureRecognizerNew.RecognizeGesture(points3D, totalDrawingTime)
+            : gestureRecognizer.RecognizeGesture(points3D, totalDrawingTime);
         
         if (result.success)
         {

@@ -18,7 +18,7 @@ public class ShieldEffect : MonoBehaviour
     [Header("References")]
     [SerializeField] private Transform targetToFollow;
     [SerializeField] private MeshRenderer meshRenderer;
-    [SerializeField] private ParticleSystem particleSystem;
+    [SerializeField] private new ParticleSystem particleSystem;
     
     private Material shieldMaterial;
     private Vector3 targetScale;

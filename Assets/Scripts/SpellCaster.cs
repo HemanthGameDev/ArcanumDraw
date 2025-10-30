@@ -12,11 +12,12 @@ public class SpellCaster : MonoBehaviour
     [SerializeField] private Transform spellSpawnPoint;
     [SerializeField] private Transform targetOpponent;
     
-    [Header("Projectile Settings")]
-    [SerializeField] private float projectileForce = 10f;
-    
-    [Header("Shield Settings")]
+    [Header("Spawn Settings")]
+    [SerializeField] private float projectileForce = 15f;
+    [SerializeField] private float arcHeight = 3f;
     [SerializeField] private float shieldSpawnDistance = 1.5f;
+    [SerializeField] private bool autoScaleToPlayerSize = true;
+    [SerializeField] private float spellScaleMultiplier = 1f;
     
     [Header("Optional References")]
     [SerializeField] private GestureDrawingManager gestureDrawingManager;
@@ -129,14 +130,68 @@ public class SpellCaster : MonoBehaviour
             return;
         }
         
-        Vector3 spawnPosition = spellSpawnPoint != null ? spellSpawnPoint.position : transform.position;
-        Quaternion spawnRotation = spellSpawnPoint != null ? spellSpawnPoint.rotation : Quaternion.identity;
+        Vector3 spawnPosition = CalculateSpawnPosition(spell);
+        Quaternion spawnRotation = CalculateSpawnRotation(spell);
         
         GameObject spellEffect = Instantiate(spell.spellEffectPrefab, spawnPosition, spawnRotation);
+        
+        if (autoScaleToPlayerSize)
+        {
+            ApplyScaleBasedOnPlayer(spellEffect);
+        }
+        else if (spellScaleMultiplier != 1f)
+        {
+            spellEffect.transform.localScale *= spellScaleMultiplier;
+        }
         
         Debug.Log($"<color=cyan>✓ Spawned {spell.spellName} effect at {spawnPosition}</color>");
         
         InitializeSpellEffect(spellEffect, spell);
+    }
+    
+    private Vector3 CalculateSpawnPosition(SpellData spell)
+    {
+        if (spell.spellID.Contains("Shield") || spell.spellID.Contains("shield"))
+        {
+            Vector3 directionToOpponent = targetOpponent != null 
+                ? (targetOpponent.position - transform.position).normalized 
+                : transform.forward;
+            
+            return transform.position + directionToOpponent * shieldSpawnDistance;
+        }
+        
+        return spellSpawnPoint != null ? spellSpawnPoint.position : transform.position;
+    }
+    
+    private Quaternion CalculateSpawnRotation(SpellData spell)
+    {
+        if (spell.spellID.Contains("Shield") || spell.spellID.Contains("shield"))
+        {
+            Vector3 directionToOpponent = targetOpponent != null 
+                ? (targetOpponent.position - transform.position).normalized 
+                : transform.forward;
+            
+            return Quaternion.LookRotation(directionToOpponent);
+        }
+        
+        if (targetOpponent != null)
+        {
+            Vector3 directionToTarget = (targetOpponent.position - (spellSpawnPoint != null ? spellSpawnPoint.position : transform.position)).normalized;
+            return Quaternion.LookRotation(directionToTarget);
+        }
+        
+        return spellSpawnPoint != null ? spellSpawnPoint.rotation : transform.rotation;
+    }
+    
+    private void ApplyScaleBasedOnPlayer(GameObject spellEffect)
+    {
+        Vector3 playerScale = transform.localScale;
+        float averagePlayerScale = (playerScale.x + playerScale.y + playerScale.z) / 3f;
+        
+        Vector3 baseScale = spellEffect.transform.localScale;
+        spellEffect.transform.localScale = baseScale * averagePlayerScale * spellScaleMultiplier;
+        
+        Debug.Log($"Auto-scaled spell: Player avg scale = {averagePlayerScale:F3}, Spell scale = {spellEffect.transform.localScale}");
     }
     
     private void InitializeSpellEffect(GameObject spellEffect, SpellData spell)
@@ -145,15 +200,16 @@ public class SpellCaster : MonoBehaviour
         LightningEffect lightning = spellEffect.GetComponent<LightningEffect>();
         ShieldEffect shield = spellEffect.GetComponent<ShieldEffect>();
         
-        if (projectile != null)
-        {
-            ApplyProjectileLogic(spellEffect, spell);
-        }
-        else if (lightning != null)
+        if (lightning != null)
         {
             if (targetOpponent != null)
             {
                 lightning.SetTarget(targetOpponent);
+                Debug.Log($"Lightning spell initialized with target: {targetOpponent.name}");
+            }
+            else
+            {
+                Debug.LogWarning("Lightning spell spawned but no opponent target assigned!");
             }
         }
         else if (shield != null)
@@ -162,20 +218,20 @@ public class SpellCaster : MonoBehaviour
                 ? (targetOpponent.position - transform.position).normalized 
                 : transform.forward;
             
-            Vector3 shieldPosition = transform.position + directionToOpponent * shieldSpawnDistance;
-            spellEffect.transform.position = shieldPosition;
-            
-            Quaternion lookRotation = Quaternion.LookRotation(directionToOpponent);
-            spellEffect.transform.rotation = lookRotation;
-            
             shield.SetTargetToFollow(transform);
             shield.SetFacingDirection(directionToOpponent);
             
-            Debug.Log($"Shield spawned at {shieldPosition}, facing opponent");
+            Debug.Log($"Shield spell initialized at position {spellEffect.transform.position}");
+        }
+        else if (projectile != null)
+        {
+            ApplyProjectileLogic(spellEffect, spell);
+            Debug.Log($"Projectile spell ({spell.spellName}) initialized");
         }
         else
         {
             ApplyProjectileLogic(spellEffect, spell);
+            Debug.LogWarning($"Spell effect for {spell.spellName} has no recognized component (SpellProjectile, LightningEffect, or ShieldEffect). Applied default projectile behavior.");
         }
     }
     
@@ -185,11 +241,27 @@ public class SpellCaster : MonoBehaviour
         
         if (rb != null && targetOpponent != null)
         {
-            Vector3 direction = (targetOpponent.position - spellEffect.transform.position).normalized;
-            spellEffect.transform.rotation = Quaternion.LookRotation(direction);
-            rb.AddForce(direction * projectileForce, ForceMode.Impulse);
+            Vector3 startPos = spellEffect.transform.position;
+            Vector3 targetPos = targetOpponent.position;
             
-            Debug.Log($"Applied force to {spell.spellName} towards target");
+            Vector3 direction = (targetPos - startPos).normalized;
+            float distance = Vector3.Distance(startPos, targetPos);
+            
+            Vector3 horizontalDir = new Vector3(direction.x, 0, direction.z).normalized;
+            float horizontalDist = Vector3.Distance(
+                new Vector3(startPos.x, 0, startPos.z),
+                new Vector3(targetPos.x, 0, targetPos.z)
+            );
+            
+            float time = horizontalDist / (projectileForce * 0.5f);
+            float upwardVelocity = (arcHeight + 0.5f * Mathf.Abs(Physics.gravity.y) * time * time) / time;
+            
+            Vector3 velocity = horizontalDir * projectileForce + Vector3.up * upwardVelocity;
+            
+            spellEffect.transform.rotation = Quaternion.LookRotation(direction);
+            rb.linearVelocity = velocity;
+            
+            Debug.Log($"Applied arc trajectory to {spell.spellName} (Force: {projectileForce}, Arc: {arcHeight}, Time: {time:F2}s)");
         }
         else if (rb != null && spellSpawnPoint != null)
         {
