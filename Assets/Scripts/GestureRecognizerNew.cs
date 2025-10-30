@@ -24,7 +24,7 @@ public class GestureRecognizerNew : MonoBehaviour
     [SerializeField] [Range(4, 12)] private int rotationSteps = 8;
     
     [Tooltip("Recognition threshold (0.35-0.45 recommended)")]
-    [SerializeField] [Range(0.15f, 0.70f)] private float recognitionTolerance = 0.40f;
+    [SerializeField] [Range(0.15f, 0.70f)] private float recognitionTolerance = 0.60f;
     
     [Header("Advanced Features")]
     [Tooltip("Use scale-invariant matching")]

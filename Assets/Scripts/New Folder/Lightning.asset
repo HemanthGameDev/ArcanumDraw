@@ -82,7 +82,7 @@ MonoBehaviour:
   - {x: -22.901537, y: -96.81255}
   - {x: -22.901539, y: -96.81255}
   - {x: -22.90155, y: -96.81257}
-  recognitionTolerance: 0.4
+  recognitionTolerance: 0.6
   allowRotation: 0
   enforceStrokeOrder: 0
   enforceSpeed: 0

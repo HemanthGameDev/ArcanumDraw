@@ -348,7 +348,7 @@ MonoBehaviour:
   useMultiRotationMatching: 1
   useGoldenSectionSearch: 1
   rotationSteps: 8
-  recognitionTolerance: 0.85
+  recognitionTolerance: 0.7
   useScaleInvariance: 1
   useStartPointInvariance: 1
   startPointTests: 8
