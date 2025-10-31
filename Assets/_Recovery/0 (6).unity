@@ -2699,7 +2699,7 @@ MonoBehaviour:
   manaRegenRate: 5
   spellSpawnPoint: {fileID: 567115274}
   targetOpponent: {fileID: 1144417139}
-  projectileForce: 5
+  projectileForce: 500
   arcHeight: 3
   shieldSpawnDistance: 0
   autoScaleToPlayerSize: 0
@@ -3166,7 +3166,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 83c5330d873641c438c4945d4b17f6a8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0067458375f5ee848a7930491a15318e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

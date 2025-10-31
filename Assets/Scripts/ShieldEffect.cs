@@ -41,9 +41,11 @@ public class ShieldEffect : MonoBehaviour
             shieldMaterial.color = new Color(shieldColor.r, shieldColor.g, shieldColor.b, 0);
         }
         
-        targetScale = transform.localScale * maxScale;
+        targetScale = new Vector3(maxScale, maxScale, maxScale);
         currentAbsorption = damageAbsorption;
         spawnTime = Time.time;
+        
+        Debug.Log($"Shield initialized: targetScale={targetScale}, maxScale={maxScale}");
     }
     
     private void Start()

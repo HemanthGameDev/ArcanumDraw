@@ -13,10 +13,11 @@ public class SpellCaster : MonoBehaviour
     [SerializeField] private Transform targetOpponent;
     
     [Header("Spawn Settings")]
-    [SerializeField] private float projectileForce = 15f;
+    [Tooltip("Speed of fireball projectile (8-15 recommended)")]
+    [SerializeField] private float projectileForce = 10f;
     [SerializeField] private float arcHeight = 3f;
     [SerializeField] private float shieldSpawnDistance = 1.5f;
-    [SerializeField] private bool autoScaleToPlayerSize = true;
+    [SerializeField] private bool autoScaleToPlayerSize = false;
     [SerializeField] private float spellScaleMultiplier = 1f;
     
     [Header("Optional References")]
@@ -135,14 +136,7 @@ public class SpellCaster : MonoBehaviour
         
         GameObject spellEffect = Instantiate(spell.spellEffectPrefab, spawnPosition, spawnRotation);
         
-        if (autoScaleToPlayerSize)
-        {
-            ApplyScaleBasedOnPlayer(spellEffect);
-        }
-        else if (spellScaleMultiplier != 1f)
-        {
-            spellEffect.transform.localScale *= spellScaleMultiplier;
-        }
+        ApplySpellScale(spellEffect, spell);
         
         Debug.Log($"<color=cyan>✓ Spawned {spell.spellName} effect at {spawnPosition}</color>");
         
@@ -158,6 +152,16 @@ public class SpellCaster : MonoBehaviour
                 : transform.forward;
             
             return transform.position + directionToOpponent * shieldSpawnDistance;
+        }
+        
+        if (spell.spellID.Contains("Lightning") || spell.spellID.Contains("lightning") || spell.spellName.ToLower().Contains("lightning"))
+        {
+            if (targetOpponent != null)
+            {
+                Vector3 aboveTarget = targetOpponent.position + Vector3.up * 3f;
+                Debug.Log($"<color=cyan>⚡ Lightning spawning 3 units above {targetOpponent.name} at: {aboveTarget}</color>");
+                return aboveTarget;
+            }
         }
         
         return spellSpawnPoint != null ? spellSpawnPoint.position : transform.position;
@@ -194,6 +198,40 @@ public class SpellCaster : MonoBehaviour
         Debug.Log($"Auto-scaled spell: Player avg scale = {averagePlayerScale:F3}, Spell scale = {spellEffect.transform.localScale}");
     }
     
+    private void ApplySpellScale(GameObject spellEffect, SpellData spell)
+    {
+        Vector3 targetScale = Vector3.one;
+        
+        if (spell.spellName.ToLower().Contains("fireball"))
+        {
+            return;
+        }
+        else if (spell.spellName.ToLower().Contains("lightning"))
+        {
+            targetScale = new Vector3(0.2f, 0.4f, 0.2f);
+        }
+        else if (spell.spellName.ToLower().Contains("shield"))
+        {
+            targetScale = new Vector3(2f, 2f, 0.1f);
+        }
+        else
+        {
+            targetScale = new Vector3(0.5f, 0.5f, 0.5f);
+        }
+        
+        if (autoScaleToPlayerSize)
+        {
+            Vector3 playerScale = transform.localScale;
+            float averagePlayerScale = (playerScale.x + playerScale.y + playerScale.z) / 3f;
+            targetScale *= averagePlayerScale;
+        }
+        
+        targetScale *= spellScaleMultiplier;
+        spellEffect.transform.localScale = targetScale;
+        
+        Debug.Log($"Set {spell.spellName} scale to {targetScale}");
+    }
+    
     private void InitializeSpellEffect(GameObject spellEffect, SpellData spell)
     {
         SpellProjectile projectile = spellEffect.GetComponent<SpellProjectile>();
@@ -205,7 +243,8 @@ public class SpellCaster : MonoBehaviour
             if (targetOpponent != null)
             {
                 lightning.SetTarget(targetOpponent);
-                Debug.Log($"Lightning spell initialized with target: {targetOpponent.name}");
+                lightning.SetCaster(transform);
+                Debug.Log($"Lightning spell initialized with target: {targetOpponent.name}, caster: {transform.name}");
             }
             else
             {
@@ -238,6 +277,12 @@ public class SpellCaster : MonoBehaviour
     private void ApplyProjectileLogic(GameObject spellEffect, SpellData spell)
     {
         Rigidbody rb = spellEffect.GetComponent<Rigidbody>();
+        SpellProjectile projectile = spellEffect.GetComponent<SpellProjectile>();
+        
+        if (projectile != null)
+        {
+            projectile.SetCaster(transform);
+        }
         
         if (rb != null && targetOpponent != null)
         {
@@ -245,27 +290,47 @@ public class SpellCaster : MonoBehaviour
             Vector3 targetPos = targetOpponent.position;
             
             Vector3 direction = (targetPos - startPos).normalized;
+            direction.y = 0;
+            direction.Normalize();
+            
             float distance = Vector3.Distance(startPos, targetPos);
             
-            Vector3 horizontalDir = new Vector3(direction.x, 0, direction.z).normalized;
-            float horizontalDist = Vector3.Distance(
-                new Vector3(startPos.x, 0, startPos.z),
-                new Vector3(targetPos.x, 0, targetPos.z)
-            );
-            
-            float time = horizontalDist / (projectileForce * 0.5f);
-            float upwardVelocity = (arcHeight + 0.5f * Mathf.Abs(Physics.gravity.y) * time * time) / time;
-            
-            Vector3 velocity = horizontalDir * projectileForce + Vector3.up * upwardVelocity;
+            Vector3 velocity = direction * projectileForce;
             
             spellEffect.transform.rotation = Quaternion.LookRotation(direction);
+            
+            rb.isKinematic = false;
+            rb.useGravity = false;
+            rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotation;
             rb.linearVelocity = velocity;
             
-            Debug.Log($"Applied arc trajectory to {spell.spellName} (Force: {projectileForce}, Arc: {arcHeight}, Time: {time:F2}s)");
+            Debug.Log($"<color=cyan>🔥 Fireball Physics Applied:</color>");
+            Debug.Log($"   Start: {startPos}");
+            Debug.Log($"   Target: {targetPos} ({targetOpponent.name})");
+            Debug.Log($"   Direction (Y locked): {direction}");
+            Debug.Log($"   Distance: {distance:F2}");
+            Debug.Log($"   Velocity: {velocity} (Magnitude: {velocity.magnitude:F2})");
+            Debug.Log($"   Rigidbody: isKinematic={rb.isKinematic}, useGravity={rb.useGravity}, constraints={rb.constraints}");
+            
+            if (projectile != null)
+            {
+                projectile.SetSpeed(projectileForce);
+            }
         }
         else if (rb != null && spellSpawnPoint != null)
         {
             rb.AddForce(spellSpawnPoint.forward * projectileForce, ForceMode.Impulse);
+            
+            if (projectile != null)
+            {
+                projectile.SetSpeed(projectileForce);
+            }
+            
+            Debug.Log($"<color=cyan>Projectile launched with forward force: {projectileForce}</color>");
+        }
+        else
+        {
+            Debug.LogError($"<color=red>ApplyProjectileLogic FAILED: rb={rb != null}, targetOpponent={targetOpponent != null}</color>");
         }
     }
     
