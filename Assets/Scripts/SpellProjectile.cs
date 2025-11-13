@@ -230,7 +230,16 @@ public class SpellProjectile : MonoBehaviour
     
     private void ApplyDamage(GameObject target)
     {
-        Debug.Log($"<color=orange>Fireball hit {target.name} for {damage} damage!</color>");
+        PlayerStats targetStats = target.GetComponent<PlayerStats>();
+        if (targetStats != null)
+        {
+            targetStats.TakeDamage(damage);
+            Debug.Log($"<color=orange>💥 Fireball hit {target.name} for {damage} damage!</color>");
+        }
+        else
+        {
+            Debug.LogWarning($"Fireball hit {target.name} but no PlayerStats component found!");
+        }
     }
     
     private void SpawnImpactEffect(Vector3 position, Vector3 normal)

@@ -311,7 +311,16 @@ public class LightningEffect : MonoBehaviour
     
     private void ApplyDamage(GameObject target)
     {
-        Debug.Log($"<color=yellow>⚡ Lightning struck {target.name} for {damage} damage!</color>");
+        PlayerStats targetStats = target.GetComponent<PlayerStats>();
+        if (targetStats != null)
+        {
+            targetStats.TakeDamage(damage);
+            Debug.Log($"<color=yellow>⚡ Lightning struck {target.name} for {damage} damage!</color>");
+        }
+        else
+        {
+            Debug.LogWarning($"Lightning hit {target.name} but no PlayerStats component found!");
+        }
     }
     
     public void SetTarget(Transform newTarget)

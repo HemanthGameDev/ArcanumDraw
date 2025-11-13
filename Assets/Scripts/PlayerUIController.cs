@@ -27,6 +27,7 @@ public class PlayerUIController : MonoBehaviour
     
     [Header("Component References")]
     [SerializeField] private SpellCaster spellCaster;
+    [SerializeField] private PlayerStats playerStats;
     [SerializeField] private GestureDrawingManager drawingManager;
     [SerializeField] private GestureRecognizer gestureRecognizer;
     
@@ -41,6 +42,12 @@ public class PlayerUIController : MonoBehaviour
     {
         InitializeHealthMana();
         
+        if (playerStats != null)
+        {
+            playerStats.OnHealthChanged += OnHealthChanged;
+            currentHealth = playerStats.CurrentHealth;
+        }
+        
         if (gestureRecognizer != null)
         {
             InitializeSpellIcons(gestureRecognizer.GetAvailableSpells());
@@ -52,6 +59,20 @@ public class PlayerUIController : MonoBehaviour
         }
     }
     
+    private void OnDestroy()
+    {
+        if (playerStats != null)
+        {
+            playerStats.OnHealthChanged -= OnHealthChanged;
+        }
+    }
+    
+    private void OnHealthChanged(float newHealth, float maxHealth)
+    {
+        currentHealth = newHealth;
+        UpdateHealthMana();
+    }
+    
     private void Update()
     {
         UpdateHealthMana();
@@ -59,9 +80,11 @@ public class PlayerUIController : MonoBehaviour
     
     private void InitializeHealthMana()
     {
+        float maxHealth = playerStats != null ? playerStats.MaxHealth : HEALTH_MAX;
+        
         if (healthSlider != null)
         {
-            healthSlider.maxValue = HEALTH_MAX;
+            healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth;
         }
         
@@ -74,29 +97,32 @@ public class PlayerUIController : MonoBehaviour
     
     public void UpdateHealthMana()
     {
-        if (spellCaster == null) return;
-        
-        float currentMana = spellCaster.GetCurrentMana();
-        float maxMana = spellCaster.GetMaxMana();
+        float maxHealth = playerStats != null ? playerStats.MaxHealth : HEALTH_MAX;
         
         if (healthSlider != null)
         {
             healthSlider.value = currentHealth;
         }
         
-        if (manaSlider != null)
-        {
-            manaSlider.value = currentMana;
-        }
-        
         if (healthText != null)
         {
-            healthText.text = $"{currentHealth:F0}/{HEALTH_MAX:F0}";
+            healthText.text = $"{currentHealth:F0}/{maxHealth:F0}";
         }
         
-        if (manaText != null)
+        if (spellCaster != null)
         {
-            manaText.text = $"{currentMana:F0}/{maxMana:F0}";
+            float currentMana = spellCaster.GetCurrentMana();
+            float maxMana = spellCaster.GetMaxMana();
+            
+            if (manaSlider != null)
+            {
+                manaSlider.value = currentMana;
+            }
+            
+            if (manaText != null)
+            {
+                manaText.text = $"{currentMana:F0}/{maxMana:F0}";
+            }
         }
     }
     
