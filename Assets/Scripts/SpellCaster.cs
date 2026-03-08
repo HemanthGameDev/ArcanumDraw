@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public class SpellCaster : MonoBehaviour
@@ -7,6 +8,8 @@ public class SpellCaster : MonoBehaviour
     [SerializeField] private float currentMana = 100f;
     [SerializeField] private float maxMana = 100f;
     [SerializeField] private float manaRegenRate = 5f;
+    
+    public event Action<float, float> OnManaChanged;
     
     [Header("Spell Transform References")]
     [SerializeField] private Transform spellSpawnPoint;
@@ -26,6 +29,11 @@ public class SpellCaster : MonoBehaviour
     
     private Dictionary<string, float> spellCooldowns = new Dictionary<string, float>();
     
+    private void Start()
+    {
+        OnManaChanged?.Invoke(currentMana, maxMana);
+    }
+    
     private void Update()
     {
         RegenerateMana();
@@ -35,8 +43,14 @@ public class SpellCaster : MonoBehaviour
     {
         if (currentMana < maxMana)
         {
+            float previousMana = currentMana;
             currentMana += manaRegenRate * Time.deltaTime;
             currentMana = Mathf.Min(currentMana, maxMana);
+            
+            if (Mathf.Abs(currentMana - previousMana) > 0.01f)
+            {
+                OnManaChanged?.Invoke(currentMana, maxMana);
+            }
         }
     }
     
@@ -116,6 +130,7 @@ public class SpellCaster : MonoBehaviour
     {
         currentMana -= amount;
         currentMana = Mathf.Max(0f, currentMana);
+        OnManaChanged?.Invoke(currentMana, maxMana);
     }
     
     private void StartCooldown(SpellData spell)
